@@ -74,23 +74,10 @@ data = data.drop(columns=["QuestionID"])
 #we will drop the gender, country, age questions.
 #print(data["questiontext"].unique())
 #print(data["questionid"].nunique())
-#'What country do you work in?'
 
-#'Are you self-employed?'
+#'What country do you work in?'
 # 'What is your race?  'What is your gender?'  'What country do you live in?'
-#  'Overall, how well do you think the tech industry supports employees with mental health issues?'
-#  'Overall, how much importance did your previous employer place on mental health?'
-#  'Overall, how much importance does your employer place on mental health?'
-#  'If yes, what condition(s) have you been diagnosed with?'
-# 'If yes, what condition(s) have you been diagnosed with?'
-#  'Are you openly identified at work as a person with a mental health issue?'
-#  'Have you had a mental health disorder in the past?'
-# 'Do you feel that being identified as a person with a mental health issue would hurt your career?'
-#    'Has being identified as a person with a mental health issue affected your career?']
-#  'If you have revealed a mental health issue to a coworker or employee, do you believe this has impacted you negatively?'
-#'Do you currently have a mental health disorder?'
-#'If maybe, what condition(s) do you believe you have?'
-#  'How easy is it for you to take medical leave for a mental health condition?'
+
 
 
 #little check on what we have
@@ -108,7 +95,6 @@ for condt in condition:
 #let's see our data
 
 from collections import Counter
-import seaborn as sns
 
 #%% Race
 target = data["race"].values #lets see distribution
@@ -152,13 +138,12 @@ for k,v in counter.items():
 #  'Female-identified' 'agender' 'Questioning' 'I have a penis' 'rr'
 #  'Agender trans woman' 'femmina' '43' 'masculino' 'I am a Wookie'
 #  'Trans non-binary/genderfluid' 'Non-binary and gender fluid']
-
-'Other'
+#'Other'
 
 
 col_name='gender'
 
-conditions = [
+conditions_gender = [
     data[col_name].isin(['Female', 'Female or Multi-Gender Femme',  'Female assigned at birth', 'Female-ish', 'Female-identified', 'female', 'Woman-identified', 'femmina', 'AFAB']),
     data[col_name].isin(['Male',
                         'Male-ish', 'something kinda male?', 'Guy (-ish) ^_^', 'ostensibly male, unsure what that really means', 'Cishet male', 'Ostensibly Male', 'MALE', 'male',
@@ -174,8 +159,8 @@ conditions = [
     data[col_name].isin(['none of your business', 'Nah', 'None', 'A little about you', 'p', 'I have a penis', 'rr', 'I am a Wookie',  'Unicorn', 'God King of the Valajar',   'Questioning',    '43',
   'sometimes',   '\\-']),
 ]
-result = ["Female", "Male", "Transgender","Non-Binary",0]
-data['gender']=np.select(conditions,result)
+result = ["Female", "Male", "Transgender","Non-Binary","No-info"]
+data['gender']=np.select(conditions_gender,result, default="No-info")
 
 print(data['gender'].unique())
 
@@ -193,5 +178,108 @@ for k,v in counter.items():
 # Gender=0, Count=1111, Percentage=0.499%
 # Gender Distribution Pie Chart
 
+#%% Lets create the columns to use in our research
 
+#  'Overall, how well do you think the tech industry supports employees with mental health issues?'
+#  'Overall, how much importance did your previous employer place on mental health?'
+#  'Overall, how much importance does your employer place on mental health?'
+#  'If yes, what condition(s) have you been diagnosed with?'
+# 'If yes, what condition(s) have you been diagnosed with?'
+#  'Are you openly identified at work as a person with a mental health issue?'
+#  'Have you had a mental health disorder in the past?'
+# 'Do you feel that being identified as a person with a mental health issue would hurt your career?'
+#    'Has being identified as a person with a mental health issue affected your career?']
+#  'If you have revealed a mental health issue to a coworker or employee, do you believe this has impacted you negatively?'
+#'Do you currently have a mental health disorder?'
+#'If maybe, what condition(s) do you believe you have?'
+#  'How easy is it for you to take medical leave for a mental health condition?'
+
+#These are the ones I found useeful. However we won't be using all of them.
+
+#This three will be merged into one
+mental_health = [
+'Have you ever been diagnosed with a mental health disorder?',
+'Have you had a mental health disorder in the past?',
+'Do you currently have a mental health disorder?',
+]
+df_mh = data[data['questiontext'].isin(mental_health)]
+
+print(df_mh["AnswerText"].unique()) #we will have the answers has yes, no, possibly and no-info
+print(df_mh["questionid"].unique()) #to drop it later 33 32 34
+
+data['MHC_exist']=np.select([data["questionid"].isin([33,32,34])],[32])
+
+condition = []
+
+condition.append(data["questionid"]==32)
+data["MHC_exist"] = np.where(condition[-1], data["AnswerText"], None)
+data['MHC_exist'] = data.groupby('UserID')['MHC_exist'].bfill().ffill()
+
+col_name='MHC_exist'
+conditions_exist = [
+    data[col_name].isin(['Yes']),
+    data[col_name].isin(['No']),
+    data[col_name].isin(['Maybe','Possibly']),
+]
+result = ["Yes", "No", "Possibly"]
+data['MHC_exist']=np.select(conditions_exist,result, default="No-info")
+
+
+mh = ['If yes, what condition(s) have you been diagnosed with?',
+'If maybe, what condition(s) do you believe you have?']
+
+df_mh = data[data['questiontext'].isin(mh)]
+print(df_mh["AnswerText"].unique()) #we will have the answers has yes, no, possibly and no-info
+
+col_name='AnswerText'
+
+conditions_MHC = [
+    data[col_name].isin([
+'Mood Disorder (Depression, Bipolar Disorder, etc)', 'Depression', 'Seasonal Affective Disorder']),
+data[col_name].isin([
+ 'Anxiety Disorder (Generalized, Social, Phobia, etc)', 'Intimate Disorder',  'PTSD (undiagnosed)',  'post-partum / anxiety', 'Stress Response Syndromes' \
+ 'Post-traumatic Stress Disorder', 'Depersonalisation', 'depersonalization disorder',  'Obsessive-Compulsive Disorder',
+'Burn out',  'Burnout']),
+data[col_name].isin([
+'Eating Disorder (Anorexia, Bulimia, etc)']),
+data[col_name].isin([
+'Addictive Disorder',  'Sexual addiction',  'Substance Use Disorder' ]),
+data[col_name].isin([
+ 'Attention Deficit Hyperactivity Disorder',  'ADD (w/o Hyperactivity)']),
+data[col_name].isin([
+ 'Personality Disorder (Borderline, Antisocial, Paranoid, etc)', 'Schizotypal Personality Disorder']),
+data[col_name].isin([
+ 'Psychotic Disorder (Schizophrenia, Schizoaffective, etc)']),
+data[col_name].isin([
+ 'Dissociative Disorder']),
+data[col_name].isin([
+ 'Gender Identity Disorder',  'Gender Dysphoria',  'Transgender' ]),
+data[col_name].isin([
+ "Autism (Asperger's)", 'Asperges', 'Autism', "Asperger's", 'Autism spectrum disorder',  'Autism Spectrum Disorder', 'Asperger Syndrome',
+'PDD-NOS',  'Pervasive Developmental Disorder (Not Otherwise Specified)']),
+data[col_name].isin([
+'Sleeping Disorder']),
+data[col_name].isin([
+'Tinnitus',  'Combination of physical impairment (strongly near-sighted) with a possibly mental one (MCD / "ADHD", though its actually a stimulus filtering impairment)',
+"I haven't been formally diagnosed, so I felt uncomfortable answering, but Social Anxiety and Depression.",  'Traumatic Brain Injury',
+"We're all hurt, right?!", 'Suicidal Ideation'])
+]
+result = ["Mood Disorder (Depression, Bipolar Disorder, etc)", "'Anxiety/PTSD/OCD/Stress", "Eating Disorder",
+          "Addictive Disorders","ADD/HD","Personality Disorder (Borderline, Antisocial, Paranoid, etc)",
+          'Psychotic Disorder (Schizophrenia, Schizoaffective, etc)',
+          'Dissociative Disorder',
+          'Gender Dysphoria',
+        "Autism (Asperger's, PDD-NOS)",
+        'Sleeping Disorder',
+          pd.NA          ]
+data['MHC']=np.select(conditions_MHC,result, default=pd.NA)
+
+for condt in condition:
+    data = data.drop(data[condt].index)
+
+#now we can drop the other questions keep only 1 as user_id
+olddata = data.drop(columns=["questiontext","questionid","AnswerText"])
+
+df = olddata.drop_duplicates(subset=['UserID'])
+df = df.apply(lambda x: x.fillna("None"))
 
