@@ -26,8 +26,21 @@ rf.fit(X_train, y_train)
 predictions = rf.predict(X_test)
 score = round(accuracy_score(y_test, predictions), 3)
 print(encoder.categories_) # get categories
-from sklearn.metrics import plot_confusion_matrix
 
-plot_confusion_matrix(rf, X_test, y_test)
-plt.title('RandomForest Accuracy Score: {0}'.format(score), size = 15)
-plt.show()
+import modelsplots as mp
+mp.heatmap_cm(rf, X_test, y_test, score, "Random Forest")
+
+
+#%% Get numerical feature importances
+feature_list = list(data.columns)
+
+importances = list(rf.feature_importances_)
+# List of tuples with variable and importance
+feature_importances = [(feature, round(importance, 2)) for feature, importance in zip(feature_list, importances)]
+# Sort the feature importances by most important first
+feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse = True)
+# Print out the feature and importances
+[print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances]
+
+#%%
+

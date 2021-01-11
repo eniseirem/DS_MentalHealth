@@ -3,24 +3,6 @@ import matplotlib.pyplot as plt
 
 data = pre.data
 #%%
-# Gender Distribution Pie Chart
-
-explode = (0, 0, 0, 0.3, 0.5)
-
-wp = {'linewidth': 1, 'edgecolor': "black"}
-print(data.groupby("gender"))
-data.groupby("gender").size().plot(kind='pie', fontsize=10, explode=explode,
-                                 wedgeprops=wp,
-                                 startangle=90,
-                                autopct='%1.0f%%',
-                                   pctdistance=1.1, labeldistance=1.2
-                                 )
-plt.axis('equal')
-plt.ylabel('')
-plt.legend(labels=data.groupby("gender").groups.keys(), loc="lower left")
-plt.tight_layout()
-plt.show()
-#%%
 # Race Distribution Pie Chart
 #
 
@@ -86,3 +68,4 @@ plt.legend(labels=data.groupby("MHC").groups.keys(), bbox_to_anchor=(1,0.5), loc
 plt.subplots_adjust(left=0.0, bottom=0.1, right=0.7)
 plt.tight_layout()
 plt.show()
+
