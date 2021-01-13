@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 
 
 data = pre.df #this is the fixed dataset
+df3 = pre.df3
 
 y=data["MHC_exist"]
-X=data.drop(columns=["MHC_exist"])
+X=data.drop(columns=["MHC_exist", "SurveyID"])
+#year of the survey is not relevant here
 
 from sklearn.preprocessing import OneHotEncoder
 
@@ -34,47 +36,18 @@ score, predictions = LR(X_train, y_train,X_test,y_test)
 
 import modelsplots as mp
 mp.heatmap_cm(lr, X_test, y_test, score, "Logistic Regression")
-#%% some sauce
-# from mlxtend.feature_selection import SequentialFeatureSelector as SFS
-# from sklearn.pipeline import Pipeline
-# import time
-# def sfs_(m):
-#     global precision
-#     global recall
-#     global sfs1
-#     sfs1 = SFS(lr,
-#                    k_features=m,
-#                    forward=True,
-#                    floating=False,
-#                    scoring='accuracy',
-#                    n_jobs=-1)
-#     # now we can work with our selected features
-#     #.fit(X_train.iloc[:, feat_cols], y_train)
-#     print("m = " + "{:f}".format(m))
-#     pipe = Pipeline([('sfs1', sfs1),
-#                               ('LR', lr)])
-#     start = time.time()
-#     pipe.fit(X_train, y_train)
-#     stop = time.time()
-#     print(f"Training time: {stop - start}s")
-#     print(sfs1.k_feature_idx_)
-#     start = time.time()
-#     cc = pipe.predict(X_test)
-#     acc = pipe.score(X_test, y_test)
-#     stop = time.time()
-#     print(f"Valid time: {stop - start}s")
-#     print(acc)
-#     col = pipe.named_steps['sfs1'].k_feature_names_
-#     return col, acc
-# best_acc = 0
-# for m in range(1,9):
-#     col, acc = sfs_(m)
-#     if acc > best_acc:
-#         best_acc = acc
-#
-# print("Our best accuracy = " + "{:f}".format(best_acc))
-
-
 
 
 #%%
+
+y=df3["MHC_exist"]
+X=df3.drop(columns=["MHC_exist","MHC"])
+encoder = OneHotEncoder(handle_unknown="ignore")
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+encoder.fit(X_train)
+X_train = encoder.transform(X_train)
+X_test = encoder.transform(X_test)
+
+score, pre = LR(X_train, y_train,X_test, y_test)
+mp.heatmap_cm(lr, X_test, y_test, score, "Logistic Regression")

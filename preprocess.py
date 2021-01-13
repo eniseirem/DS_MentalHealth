@@ -281,5 +281,39 @@ for condt in condition:
 olddata = data.drop(columns=["questiontext","questionid","AnswerText"])
 
 df = olddata.drop_duplicates(subset=['UserID'])
-df = df.apply(lambda x: x.fillna("None"))
+df = df.apply(lambda x: x.fillna("No-info"))
+df = df.drop(columns="UserID") #we don't need this
+
+#%% I added this part after the one hot encode trial
+# I will change the informations to numbers by myself.
+
+df2 = df.copy()
+
+col_name='MHC_exist'
+conditions_exist = [
+    df2[col_name].isin(['Yes','Possibly']),
+    df2[col_name].isin(['No']),
+]
+result = [1, 0]
+df2['MHC_exist']=np.select(conditions_exist,result, default=-1)
+df2.replace("No-info",-1, True)
+
+# No-info won't be helping with gender data so
+df3 = df.copy()
+df2 = df2[df2.gender != -1] #we lost 18 data
+df2 = df2[df2.MHC_exist != -1] #we lost 18 data
+df3 = df3[df3.gender != "No-info"]
+#df3 = df3[df3.MHC_exist != "No-info"]
+df3 = df3[df3.MHC_exist != "Possibly"]
+#let's divide possibly answers.
+#data.country = data.country.apply(lambda x: 'USA' if 'United States' in x else x)
+
+#df2.MHC_exist = df2.MHC_exist.apply((lambda x: 'No' && ))
+#df2 = df2.groupby('country')['MHC_exist'].apply(lambda x: x[x == 1].count()).to_csv('c.csv')
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.max_rows', None)
 
