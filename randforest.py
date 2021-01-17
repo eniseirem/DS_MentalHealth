@@ -10,9 +10,7 @@ from sklearn.metrics import confusion_matrix as cm
 data = pre.df #this is the fixed dataset
 df2 = pre.df2
 df3 = pre.df3
-precisions = []
-recalls = []
-accs = []
+
 print(data.tail)
 y=data["MHC_exist"]
 X=data.drop(columns=["MHC_exist","MHC"])
@@ -27,7 +25,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 encoder.fit(X_train)
 X_train = encoder.transform(X_train)
 X_test = encoder.transform(X_test)
-rf = RandomForestClassifier(n_estimators=100, max_depth=3, random_state=42)
+#max-depth checked between 3-17
+rf = RandomForestClassifier(n_estimators=100, max_depth=15, random_state=42)
+
 
 def RF(X_train, y_train,X_test, y_test):
     rf.fit(X_train, y_train)
@@ -40,7 +40,7 @@ print(encoder.categories_) # get categories
 import modelsplots as mp
 score, pre = RF(X_train, y_train,X_test, y_test)
 
-#mp.heatmap_cm(rf, X_test, y_test, score, "Random Forest")
+mp.heatmap_cm(rf, X_test, y_test, score, "Random Forest")
 
 
 #%% Get numerical feature importances
@@ -73,11 +73,12 @@ mp.heatmap_cm(rf, X_test, y_test, score, "Random Forest")
 
 #This can be mean that race or gender does not have that much impact when predicting mental health condition.
 
-
+#%%
 y=df2["MHC_exist"]
 X=df2.drop(columns=["MHC_exist","MHC"])
 from sklearn.preprocessing import LabelEncoder
 
+## this was just for checking it isn't included in the report
 le = LabelEncoder()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -86,8 +87,6 @@ X_train = X_train.apply(lambda col: le.fit_transform(col.astype(str)), axis=0, r
 X_test = X_test.apply(lambda col: le.fit_transform(col.astype(str)), axis=0, result_type='expand')
 
 score, pre = RF(X_train, y_train,X_test, y_test)
-
-
 
 #print(encoder.categories_) # get categories
 #mp.heatmap_cm(rf, X_test, y_test, score, "Random Forest")

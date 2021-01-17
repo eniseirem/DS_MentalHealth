@@ -303,17 +303,13 @@ df3 = df.copy()
 df2 = df2[df2.gender != -1] #we lost 18 data
 df2 = df2[df2.MHC_exist != -1] #we lost 18 data
 df3 = df3[df3.gender != "No-info"]
-#df3 = df3[df3.MHC_exist != "No-info"]
+df3 = df3[df3.MHC_exist != "No-info"]
 df3 = df3[df3.MHC_exist != "Possibly"]
-#let's divide possibly answers.
-#data.country = data.country.apply(lambda x: 'USA' if 'United States' in x else x)
 
+#%%
+# this .csv file used while creating map for country
 #df2.MHC_exist = df2.MHC_exist.apply((lambda x: 'No' && ))
 #df2 = df2.groupby('country')['MHC_exist'].apply(lambda x: x[x == 1].count()).to_csv('c.csv')
+#%%
 
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', -1)
-pd.set_option('display.max_rows', None)
 
